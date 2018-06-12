@@ -1,20 +1,21 @@
 package zhongl.stream.oauth2
 
-import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.StatusCodes.{OK, Unauthorized}
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.Accept
+import akka.http.scaladsl.util.FastFuture
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import akka.stream.{ActorMaterializer, FlowShape, Graph}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
 
 class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
   implicit val system = ActorSystem(getClass.getSimpleName)
   implicit val mat    = ActorMaterializer()
-
+  implicit val ec     = system.dispatcher
 
   classOf[Guard].getSimpleName should {
 
@@ -33,10 +34,15 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
       Await.result(f, 1.second).status shouldBe Unauthorized
     }
 
+    "redirect illegal get html request" in {
+      val Left(f) = runGuard(HttpRequest(headers = Accept(MediaRanges.`text/*`) :: Nil))
+      Await.result(f, 1.second).status shouldBe Found
+    }
+
   }
 
   private def runGuard(req: HttpRequest) = {
-  Await.result(Source.single(req).via(Flow.fromGraph(Guard.flow(Example))).runWith(Sink.head), 1.second)
+    Await.result(Source.single(req).via(Flow.fromGraph(Guard.flow(Example))).runWith(Sink.head), 1.second)
   }
 
   override protected def afterAll(): Unit = system.terminate()
@@ -52,11 +58,9 @@ object Example extends Guard {
 
   override def authorized(req: HttpRequest): Boolean = req.uri == Uri("/authorized")
 
-  override def reject: Graph[FlowShape[HttpRequest, Future[HttpResponse]], NotUsed] = {
-    Flow.fromFunction(_ => Future.successful(HttpResponse(Unauthorized)))
-  }
+  override protected def refresh = FastFuture.successful("token")
 
-  override def principal: Graph[FlowShape[(Future[Token], HttpRequest), (Future[Token], Future[HttpResponse])], NotUsed] = {
-    Flow.fromFunction { case (tf, _) => (tf, Future.successful(HttpResponse(OK))) }
-  }
+  override protected def principal(token: String, request: HttpRequest) = FastFuture.successful(HttpResponse())
+
+  override protected def redirectToAuthorizeWith(uri: Uri) = HttpResponse(StatusCodes.Found)
 }
