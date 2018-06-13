@@ -13,9 +13,10 @@ object Dependencies {
   )
 
   val akka = Seq(
-    "com.typesafe.akka" %% "akka-stream"       % Version.akka,
-    "com.typesafe.akka" %% "akka-http"         % Version.http,
-    "com.typesafe.akka" %% "akka-http-testkit" % Version.http % Test
+    "com.typesafe.akka" %% "akka-stream"          % Version.akka,
+    "com.typesafe.akka" %% "akka-http"            % Version.http,
+    "com.typesafe.akka" %% "akka-http-spray-json" % Version.http,
+    "com.typesafe.akka" %% "akka-http-testkit"    % Version.http % Test
   )
 
   val auth0 = Seq(

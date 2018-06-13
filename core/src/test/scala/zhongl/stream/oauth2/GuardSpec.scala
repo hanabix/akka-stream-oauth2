@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Accept, Host}
+import akka.http.scaladsl.model.headers.{Accept, Host, Location}
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
@@ -43,7 +43,7 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
   }
 
   private def runGuard(req: HttpRequest) = {
-    val guard = Guard.graph(Example, Uri("http://guard/authorized"), _.uri.path == Path / "ignore")
+    val guard = Guard.graph(Example, _.uri.path == Path / "ignore")
     Await.result(Source.single(req).via(Flow.fromGraph(Flows.either(guard))).runWith(Sink.head), 1.second)
   }
 
@@ -56,7 +56,9 @@ object Example extends OAuth2[String] {
 
   override def authenticate(token: String, request: HttpRequest): Future[HttpResponse] = FastFuture.successful(HttpResponse())
 
-  override def authorization(redirect: Uri, state: String): Uri = Uri()
+  override def authorization(state: String): Location = Location(Uri())
 
   override val invalidToken: Throwable = new RuntimeException
+
+  override def redirect: Uri = Uri("http://guard/authorized")
 }
