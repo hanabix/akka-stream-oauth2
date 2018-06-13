@@ -3,25 +3,18 @@ package zhongl.stream.oauth2
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
 
-class WeWork(jt: JwtCookie, authorizedPath: Path) extends Guard {
+import scala.concurrent.Future
+
+class WeWork(jt: JwtCookie, authorizedPath: Path) extends OAuth2[String] {
   import WeWork._
 
-  override type Token     = AccessToken
-  override type Principal = UserInfo
-  override type Code      = String
-  override type State     = String
+  override def refresh: Future[String] = ???
 
-  override protected def legal(req: HttpRequest) = jt.unapply(req).isDefined
+  override def authenticate(token: String, request: HttpRequest): Future[HttpResponse] = ???
 
-  override protected def authorized(req: HttpRequest) = {
-    req.uri.toRelative.path == authorizedPath
-  }
+  override def authorization(redirect: Uri, state: String): Uri = ???
 
-  override protected def refresh = ???
-
-  override protected def principal(token: AccessToken, request: HttpRequest) = ???
-
-  override protected def redirectToAuthorizeWith(uri: Uri) = ???
+  override val invalidToken: Throwable = ???
 }
 
 object WeWork {
