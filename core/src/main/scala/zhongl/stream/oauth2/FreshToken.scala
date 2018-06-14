@@ -10,9 +10,9 @@ import scala.util.Failure
 import scala.util.control.NoStackTrace
 
 object FreshToken {
-  type Shape[T] = BidiShape[Future[HttpResponse], Future[HttpResponse], HttpRequest, (Future[T], HttpRequest)]
+  type Shape[T <: Token] = BidiShape[Future[HttpResponse], Future[HttpResponse], HttpRequest, (Future[T], HttpRequest)]
 
-  def graph[T](fresh: => Future[T])(implicit ec: ExecutionContext): Graph[Shape[T], NotUsed] =
+  def graph[T <: Token](fresh: => Future[T])(implicit ec: ExecutionContext): Graph[Shape[T], NotUsed] =
     GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
 
@@ -34,23 +34,25 @@ object FreshToken {
       BidiShape(bcastResponse.in, bcastResponse.out(0), zip.in1, zip.out)
     }
 
-  private def refresh[T](fresh: => Future[T])(implicit ec: ExecutionContext) =
-    Flow.fromFunction[Future[T], Future[T]](f => f.recoverWith { case InvalidToken => fresh })
+  private def refresh[T <: Token](fresh: => Future[T])(implicit ec: ExecutionContext) =
+    Flow.fromFunction[Future[T], Future[T]] { f =>
+      f.map(t => if (t.isInvalid) throw InvalidToken else t).recoverWith { case InvalidToken => fresh }
+    }
 
-  private def transform[T](implicit ec: ExecutionContext) =
+  private def transform[T <: Token](implicit ec: ExecutionContext) =
     ZipWith[Future[T], Future[HttpResponse], Future[T]]((tf, rf) => {
       val p = Promise[T]
       tf.flatMap { t =>
         rf.onComplete {
           case Failure(InvalidToken) => p.failure(InvalidToken)
-          case _                       => p.success(t)
+          case _                     => p.success(t)
         }
         p.future
       }
     })
 
   trait Token {
-    def isValid: Boolean
+    def isInvalid: Boolean
   }
 
   object InvalidToken extends IllegalArgumentException with NoStackTrace

@@ -8,7 +8,7 @@ import akka.http.scaladsl.util.FastFuture
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, Graph}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-import zhongl.stream.oauth2.FreshToken.{InvalidToken, Shape}
+import zhongl.stream.oauth2.FreshToken.{InvalidToken, Shape, Token}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -19,10 +19,9 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   implicit val mat    = ActorMaterializer()
   implicit val ec     = system.dispatcher
 
-
   "FreshToken" should {
     "refresh token first" in {
-      val future = runFreshToken(FreshToken.graph(FastFuture.successful("token")))
+      val future = runFreshToken(FreshToken.graph(FastFuture.successful(Example)))
       Await.result(future, 1.second) shouldBe HttpResponse()
     }
 
@@ -38,11 +37,11 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
       val sf = Source(List(HttpRequest(), HttpRequest(POST)))
         .via(
           Flow
-            .fromFunction[(Future[String], HttpRequest), Future[HttpResponse]] {
-              case (tf, HttpRequest(GET, _, _, _, _))  => tf.flatMap { case "token" => FastFuture.failed(InvalidToken) }
-              case (tf, HttpRequest(POST, _, _, _, _)) => tf.map { case "token"     => HttpResponse() }
+            .fromFunction[(Future[Example.type], HttpRequest), Future[HttpResponse]] {
+              case (tf, HttpRequest(GET, _, _, _, _))  => tf.flatMap { case Example => FastFuture.failed(InvalidToken) }
+              case (tf, HttpRequest(POST, _, _, _, _)) => tf.map { case Example     => HttpResponse() }
             }
-            .join(FreshToken.graph(FastFuture.successful("token")))
+            .join(FreshToken.graph(FastFuture.successful(Example)))
         )
         .runWith(Sink.seq)
 
@@ -54,15 +53,31 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
       Await.result(rf2, 1.second) shouldBe HttpResponse()
     }
+
+    "refresh token after latest token expired" in {
+      val sf = Source(List(HttpRequest(), HttpRequest()))
+        .via(
+          Flow
+            .fromFunction[(Future[Expiration], HttpRequest), Future[HttpResponse]] {
+              case (tf, _) => tf.flatMap { case _ => Thread.sleep(10); FastFuture.successful(HttpResponse()) }
+            }
+            .join(FreshToken.graph(FastFuture.successful(Expiration(System.currentTimeMillis() + 1))))
+        )
+        .runWith(Sink.seq)
+
+      val Seq(rf1, rf2) = Await.result(sf, 1.second)
+      Await.result(rf1, 1.second) shouldBe HttpResponse()
+      Await.result(rf2, 1.second) shouldBe HttpResponse()
+    }
   }
 
-  private def runFreshToken(freshToken: Graph[Shape[String], NotUsed]) = {
+  private def runFreshToken[T <: Token](freshToken: Graph[Shape[T], NotUsed]) = {
     val f = Source
       .single(HttpRequest())
       .via(
         Flow
-          .fromFunction[(Future[String], HttpRequest), Future[HttpResponse]] {
-            case (tf, _) => tf.map { case "token" => HttpResponse() }
+          .fromFunction[(Future[T], HttpRequest), Future[HttpResponse]] {
+            case (tf, _) => tf.map { case Example => HttpResponse() }
           }
           .join(freshToken)
       )
@@ -72,4 +87,12 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   }
 
   override protected def afterAll(): Unit = system.terminate()
+
+  object Example extends Token {
+    override def isInvalid: Boolean = false
+  }
+
+  case class Expiration(timestamp: Long) extends Token {
+    override def isInvalid: Boolean = timestamp < System.currentTimeMillis()
+  }
 }
