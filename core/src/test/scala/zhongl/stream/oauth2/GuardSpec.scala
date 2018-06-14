@@ -44,7 +44,7 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
 
   private def runGuard(req: HttpRequest) = {
     val guard = Guard.graph(Example, _.uri.path == Path / "ignore")
-    Await.result(Source.single(req).via(Flow.fromGraph(Flows.either(guard))).runWith(Sink.head), 1.second)
+    Await.result(Source.single(req).via(Flow.fromGraph(Guard.asFlow(guard))).runWith(Sink.head), 1.second)
   }
 
   override protected def afterAll(): Unit = system.terminate()
