@@ -1,4 +1,4 @@
-package zhongl.stream.oauth2
+package zhongl.stream.oauth2.wechat
 
 import java.net.URLEncoder
 import java.util.Base64
@@ -14,6 +14,7 @@ import akka.http.scaladsl.util.FastFuture
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.ByteString
 import zhongl.stream.oauth2.FreshToken.InvalidToken
+import zhongl.stream.oauth2._
 
 import scala.concurrent.{ExecutionContext, Future}
 

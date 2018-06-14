@@ -1,13 +1,13 @@
-package zhongl.stream.oauth2
+package zhongl.stream.oauth2.wechat
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
 import akka.http.scaladsl.model.headers.Location
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest._
 import zhongl.stream.oauth2.FreshToken.InvalidToken
 
 import scala.concurrent.duration._

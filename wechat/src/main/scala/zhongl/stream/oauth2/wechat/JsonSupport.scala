@@ -1,4 +1,4 @@
-package zhongl.stream.oauth2
+package zhongl.stream.oauth2.wechat
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
