@@ -2,10 +2,9 @@ import Dependencies._
 
 def commonSettings(module: String) = Seq(
   name := s"akka-stream-oauth2-$module",
-  organization := "zhongl",
+  organization := "com.github.zhongl",
   scalaVersion := "2.12.6",
-  scalacOptions += "-deprecation",
-  version := "0.0.1"
+  scalacOptions += "-deprecation"
 )
 
 lazy val core = (project in file("core"))
