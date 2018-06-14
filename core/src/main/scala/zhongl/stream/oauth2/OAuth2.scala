@@ -14,5 +14,4 @@ trait OAuth2[Token] {
 
   def redirect: Uri
 
-  val invalidToken: Throwable
 }

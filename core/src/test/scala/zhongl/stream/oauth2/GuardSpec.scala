@@ -61,8 +61,6 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
 
     override def authorization(state: String): Location = Location(Uri())
 
-    override val invalidToken: Throwable = new RuntimeException
-
     override def redirect: Uri = Uri("http://guard/authorized")
   }
 }

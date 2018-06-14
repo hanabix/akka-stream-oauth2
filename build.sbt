@@ -16,6 +16,7 @@ lazy val core = (project in file("core"))
 
 lazy val wechat = (project in file("wechat"))
   .settings(
-    commonSettings("wechat")
+    commonSettings("wechat"),
+    libraryDependencies ++= common
   )
   .dependsOn(core)
