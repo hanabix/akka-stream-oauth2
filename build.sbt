@@ -4,7 +4,7 @@ def commonSettings(module: String) = Seq(
   name := s"akka-stream-oauth2-$module",
   organization := "com.github.zhongl",
   scalaVersion := "2.12.6",
-  publishArtifact := false,
+  skip in publish := true,
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",
