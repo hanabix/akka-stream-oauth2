@@ -8,11 +8,10 @@ import akka.http.scaladsl.util.FastFuture
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, Graph}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-import zhongl.stream.oauth2.FreshToken.Shape
+import zhongl.stream.oauth2.FreshToken.{InvalidToken, Shape}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.control.NoStackTrace
 
 class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
@@ -20,17 +19,16 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   implicit val mat    = ActorMaterializer()
   implicit val ec     = system.dispatcher
 
-  object InvalidToken extends IllegalArgumentException with NoStackTrace
 
   "FreshToken" should {
     "refresh token first" in {
-      val future = runFreshToken(FreshToken.graph(FastFuture.successful("token"), InvalidToken))
+      val future = runFreshToken(FreshToken.graph(FastFuture.successful("token")))
       Await.result(future, 1.second) shouldBe HttpResponse()
     }
 
     "abnormal when refresh failed" in {
       val cause  = new RuntimeException()
-      val future = runFreshToken(FreshToken.graph(FastFuture.failed(cause), InvalidToken))
+      val future = runFreshToken(FreshToken.graph(FastFuture.failed(cause)))
       intercept[RuntimeException] {
         Await.result(future, 1.second)
       } shouldBe cause
@@ -44,7 +42,7 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
               case (tf, HttpRequest(GET, _, _, _, _))  => tf.flatMap { case "token" => FastFuture.failed(InvalidToken) }
               case (tf, HttpRequest(POST, _, _, _, _)) => tf.map { case "token"     => HttpResponse() }
             }
-            .join(FreshToken.graph(FastFuture.successful("token"), InvalidToken))
+            .join(FreshToken.graph(FastFuture.successful("token")))
         )
         .runWith(Sink.seq)
 
