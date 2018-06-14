@@ -25,8 +25,8 @@ object FreshToken {
 
       // format: OFF
       mergeToken <~ init
-      mergeToken ~> refresh(fresh) ~> bcastToken ~>zip.in0
-                                      bcastToken ~> transformToken.in0
+      mergeToken ~> refresh(fresh) ~> bcastToken           ~> zip.in0
+                                      bcastToken           ~> transformToken.in0
                                       bcastResponse.out(1) ~> transformToken.in1
       mergeToken <~                                           transformToken.out
       // format: ON

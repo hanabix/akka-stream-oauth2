@@ -6,38 +6,30 @@ import akka.http.scaladsl.model.StatusCodes.{Found, Unauthorized}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Accept, Host, Location}
 import akka.http.scaladsl.util.FastFuture
-import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Partition, Source, Unzip, Zip}
+import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Partition}
 import akka.stream.{FanOutShape2, Graph}
+import zhongl.stream.oauth2.FreshToken.Token
 
 import scala.collection.immutable
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.Failure
+import scala.concurrent.{ExecutionContext, Future}
 
 object Guard {
 
   private type Shape = FanOutShape2[HttpRequest, HttpRequest, Future[HttpResponse]]
 
-  def graph[T](oauth: OAuth2[T], ignore: HttpRequest => Boolean)(implicit ec: ExecutionContext): Graph[Shape, NotUsed] =
+  def graph[T <: Token](oauth: OAuth2[T], ignore: HttpRequest => Boolean)(implicit ec: ExecutionContext): Graph[Shape, NotUsed] =
     GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
 
-      val partitionRequest = b.add(Partition(3, partitioner(oauth.redirect, ignore)))
-      val mergeResponse    = b.add(Merge[Future[HttpResponse]](2))
-      val zip              = b.add(Zip[Future[T], HttpRequest])
-      val unzip            = b.add(Unzip[Future[T], Future[HttpResponse]])
-      val mergeToken       = b.add(Merge[Future[T]](2))
-      val initToken        = b.add(Source.single(Future.failed(oauth.invalidToken)))
+      val partition = b.add(Partition(3, partitioner(oauth.redirect, ignore)))
+      val merge     = b.add(Merge[Future[HttpResponse]](2))
 
       // format: OFF
-                                            mergeToken          <~ initToken
-                                 zip.in0 <~ mergeToken          <~ unzip.out0
-      partitionRequest.out(1) ~> zip.in1
-                                 zip.out ~> authenticate(oauth) ~> unzip.in
-                                                                   unzip.out1 ~> mergeResponse
-      partitionRequest.out(2) ~>            challenge(oauth.authorization)    ~> mergeResponse
+      partition.out(1) ~> authenticate(oauth)            ~> merge
+      partition.out(2) ~> challenge(oauth.authorization) ~> merge
       // format: ON
 
-      new FanOutShape2(partitionRequest.in, partitionRequest.out(0), mergeResponse.out)
+      new FanOutShape2(partition.in, partition.out(0), merge.out)
     }
 
   private def partitioner(redirect: Uri, ignore: HttpRequest => Boolean): HttpRequest => Int = {
@@ -78,17 +70,11 @@ object Guard {
       .map(FastFuture.successful)
   }
 
-  private def authenticate[T](oauth: OAuth2[T])(implicit ec: ExecutionContext) =
-    Flow.fromFunction[(Future[T], HttpRequest), (Future[T], Future[HttpResponse])] {
-      case (tokenF, request) =>
-        val p = Promise[T]
-        val responseF = tokenF.recoverWith { case oauth.invalidToken => oauth.refresh }.flatMap { t =>
-          oauth.authenticate(t, request).transform {
-            case r @ Failure(oauth.invalidToken) => p.failure(oauth.invalidToken); r
-            case r                               => p.success(t); r
-          }
-        }
-        (p.future, responseF)
-    }
+  private def authenticate[T <: Token](oauth: OAuth2[T])(implicit ec: ExecutionContext) =
+    Flow
+      .fromFunction[(Future[T], HttpRequest), Future[HttpResponse]] {
+        case (tf, req) => tf.flatMap(oauth.authenticate(_, req))
+      }
+      .join(FreshToken.graph(oauth.refresh))
 
 }

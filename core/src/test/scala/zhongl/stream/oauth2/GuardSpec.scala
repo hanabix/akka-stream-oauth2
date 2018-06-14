@@ -48,17 +48,23 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
   }
 
   override protected def afterAll(): Unit = system.terminate()
+
+  class ValidToken extends FreshToken.Token {
+    override def isInvalid: Boolean = false
+  }
+
+  object Example extends OAuth2[ValidToken] {
+
+    override def refresh = FastFuture.successful(new ValidToken)
+
+    override def authenticate(token: ValidToken, request: HttpRequest): Future[HttpResponse] = FastFuture.successful(HttpResponse())
+
+    override def authorization(state: String): Location = Location(Uri())
+
+    override val invalidToken: Throwable = new RuntimeException
+
+    override def redirect: Uri = Uri("http://guard/authorized")
+  }
 }
 
-object Example extends OAuth2[String] {
 
-  override def refresh = FastFuture.successful("token")
-
-  override def authenticate(token: String, request: HttpRequest): Future[HttpResponse] = FastFuture.successful(HttpResponse())
-
-  override def authorization(state: String): Location = Location(Uri())
-
-  override val invalidToken: Throwable = new RuntimeException
-
-  override def redirect: Uri = Uri("http://guard/authorized")
-}
