@@ -1,10 +1,9 @@
 import Dependencies._
 
 def commonSettings(module: String) = Seq(
-  name := s"akka-stream-oauth2-$module",
-  organization := "com.github.zhongl",
+  name := module,
+  organization := "com.github.zhongl.akka-stream-oauth2",
   scalaVersion := "2.12.6",
-  skip in publish := true,
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",
