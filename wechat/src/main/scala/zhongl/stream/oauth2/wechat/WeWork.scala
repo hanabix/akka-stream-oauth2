@@ -42,32 +42,35 @@ class WeWork(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Ac
   }
 
   override def authenticate(token: AccessToken, request: HttpRequest): Future[HttpResponse] = {
-    def queryWithToken(q: (String, String)*) = Query(("access_token" -> token.`access_token`) +: q: _*)
-
     val q = request.uri.query()
-    val result = for (code <- q.get("code"); state <- q.get("state")) yield {
-      val r = HttpRequest(uri = `api.uri.user-info`.withQuery(queryWithToken("code" -> code)))
-      http
-        .singleRequest(r)
-        .map(complainIllegalResponse {
-          case Content(PrincipalE(p))            => p.UserId
-          case Content(ErrE(Err(40014 | 42001))) => throw InvalidToken
-        })
-        .flatMap { uid =>
-          http.singleRequest(HttpRequest(uri = `api.uri.user-get`.withQuery(queryWithToken("userid" -> uid))))
-        }
-        .map(complainIllegalResponse {
-          case Content(UserInfoE(info))          => authenticated(info, base64Decode(state))
-          case Content(ErrE(Err(40014 | 42001))) => throw InvalidToken
-        })
-    }
-
-    result.getOrElse(FastFuture.successful(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity("missing code or state"))))
+    (for (code <- q.get("code"); state <- q.get("state")) yield {
+      userInfo(code, token.`access_token`).map(authenticated(_, state))
+    }).getOrElse(FastFuture.successful(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity("missing code or state"))))
   }
 
   override def authorization(state: String): Location = {
     val qs = s"$fixedQueryString${base64Encode(state)}"
     Location(`authorization.uri`.withRawQueryString(`authorization.uri`.rawQueryString.map(_ + s"&$qs").getOrElse(qs)))
+  }
+
+  @inline
+  private def userInfo(code: String, token: String) = {
+    @inline
+    def queryWithToken(q: (String, String)*) = Query(("access_token" -> token) +: q: _*)
+
+    http
+      .singleRequest(HttpRequest(uri = `api.uri.user-info`.withQuery(queryWithToken("code" -> code))))
+      .map(complainIllegalResponse {
+        case Content(PrincipalE(p))            => p.UserId
+        case Content(ErrE(Err(40014 | 42001))) => throw InvalidToken
+      })
+      .flatMap { uid =>
+        http.singleRequest(HttpRequest(uri = `api.uri.user-get`.withQuery(queryWithToken("userid" -> uid))))
+      }
+      .map(complainIllegalResponse {
+        case Content(UserInfoE(info))          => info
+        case Content(ErrE(Err(40014 | 42001))) => throw InvalidToken
+      })
   }
 
 }
