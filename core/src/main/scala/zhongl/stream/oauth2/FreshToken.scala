@@ -9,6 +9,22 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Failure
 import scala.util.control.NoStackTrace
 
+/**
+  *
+  * {{{
+  *
+  * +------------------------------------------------+
+  * |                                                |
+  * | +------+                             +------+  |
+  * | |      | ~  Future[HttpResponse]  ~> |      | ~ Future[HttpResponse] ~>
+  * | | flow |                             | bidi |  |
+  * | |      | <~(Future[T], HttpRequest)~ |      | <~      HttpRequest     ~
+  * | +------+                             +------+  |
+  * |                                                |
+  * +------------------------------------------------+
+  * }}}
+  * @see akka.stream.scaladsl.Flow#join(akka.stream.Graph)
+  */
 object FreshToken {
   type Shape[T <: Token] = BidiShape[Future[HttpResponse], Future[HttpResponse], HttpRequest, (Future[T], HttpRequest)]
 

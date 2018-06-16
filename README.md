@@ -18,3 +18,32 @@ resolvers += "jitpack" at "https://jitpack.io"
 libraryDependencies += "com.github.zhongl.akka-stream-oauth2" %% <core or wechat> % <latest tag>
 ```
 
+## Usage
+
+A simple web application it's authencation based on `Wechat Work`.
+
+```
+val ignore: HttpRequest => Boolean = ???
+val oauth2: OAuth2[AccessToken] = WeWork { ??? }
+val routes: Route = { ??? }
+val graph = GraphDSL.create() { implicit b =>
+  import GraphDSL.Implicits._
+
+  val guard = b.add(Guard.graph(oauth2, ignore))
+  val merge = b.add(Merge[Future[HttpResponse]](2))
+  val serve = b.add(Flow.fromFunction(Route.asyncHandler(routes)))
+
+  // format: OFF
+  guard.out0 ~> serve ~> merge
+  guard.out1          ~> merge
+  // format: ON
+
+  FlowShape(guard.in, merge.out)
+}
+    
+val parallelism: Int = ???
+val flow = Flow[HttpRequest].via(graph).mapAsync(parallelism)(identity)
+val f = http.bindAndHandle(flow, "0.0.0.0", 8080)
+gracefulShutdown(f)
+```
+
