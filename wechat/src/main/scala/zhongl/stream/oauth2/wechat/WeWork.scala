@@ -44,7 +44,7 @@ class WeWork(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Ac
   override def authenticate(token: AccessToken, request: HttpRequest): Future[HttpResponse] = {
     val q = request.uri.query()
     (for (code <- q.get("code"); state <- q.get("state")) yield {
-      userInfo(code, token.`access_token`).map(authenticated(_, state))
+      userInfo(code, token.`access_token`).map(authenticated(_, base64Decode(state)))
     }).getOrElse(FastFuture.successful(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity("missing code or state"))))
   }
 
