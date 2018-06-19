@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/98652a7b28ff46d7b7a9cc73b36b362a)](https://app.codacy.com/app/zhonglunfu/akka-stream-oauth2?utm_source=github.com&utm_medium=referral&utm_content=zhongl/akka-stream-oauth2&utm_campaign=badger)
 [![Release](https://jitpack.io/v/zhongl/akka-stream-oauth2.svg)](https://jitpack.io/#zhongl/akka-stream-oauth2)
 [![Build Status](https://travis-ci.org/zhongl/akka-stream-oauth2.svg?branch=master)](https://travis-ci.org/zhongl/akka-stream-oauth2)
 [![Coverage Status](https://coveralls.io/repos/github/zhongl/akka-stream-oauth2/badge.svg?branch=master)](https://coveralls.io/github/zhongl/akka-stream-oauth2?branch=master)
