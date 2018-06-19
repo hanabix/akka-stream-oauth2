@@ -8,13 +8,13 @@ This provides some useful graph shapes of [akka-stream](https://doc.akka.io/docs
 
 ## Resolvers
 
-```
+```scala
 resolvers += "jitpack" at "https://jitpack.io"
 ```
 
 ## Dependencies
 
-```
+```scala
 libraryDependencies += "com.github.zhongl.akka-stream-oauth2" %% <core or wechat> % <latest tag>
 ```
 
@@ -22,7 +22,7 @@ libraryDependencies += "com.github.zhongl.akka-stream-oauth2" %% <core or wechat
 
 A simple web application it's authencation based on `Wechat Work`.
 
-```
+```scala
 val ignore: HttpRequest => Boolean = ???
 val oauth2: OAuth2[AccessToken] = WeWork { ??? }
 val routes: Route = { ??? }
