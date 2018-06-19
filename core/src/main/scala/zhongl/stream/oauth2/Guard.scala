@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object Guard {
 
-  private type Shape = FanOutShape2[HttpRequest, HttpRequest, Future[HttpResponse]]
+  type Shape = FanOutShape2[HttpRequest, HttpRequest, Future[HttpResponse]]
 
   def graph[T <: Token](oauth: OAuth2[T], ignore: HttpRequest => Boolean)(implicit ec: ExecutionContext): Graph[Shape, NotUsed] =
     GraphDSL.create() { implicit b =>
