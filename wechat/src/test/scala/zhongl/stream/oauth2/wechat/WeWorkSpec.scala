@@ -3,8 +3,8 @@ package zhongl.stream.oauth2.wechat
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Location
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
 import org.scalatest._
@@ -66,7 +66,8 @@ class WeWorkSpec extends WordSpec with Matchers with BeforeAndAfterAll with Dire
   def mockWeWorkServer: Route = get {
     concat(
       (path("gettoken") & parameter('corpid) & parameter('corpsecret)) { (_, _) =>
-        complete(token)
+        val json = "{\"errcode\":0,\"errmsg\":\"ok\",\"access_token\":\"token\",\"expires_in\":7200}"
+        complete(HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, json)))
       },
       (path("user" / "getuserinfo") & parameter('access_token) & parameter('code)) {
         case (_, "40014") => complete(Err(40014))
