@@ -14,7 +14,7 @@ import scala.util.{Random, Try}
 case class JwtCookie(
     name: String,
     domain: String,
-    algorithm: Algorithm = Algorithm.HMAC256(Random.nextString(32)),
+    algorithm: Algorithm = Algorithm.HMAC256(new Random(System.nanoTime()).nextString(32)),
     expiration: FiniteDuration = 7.days
 ) {
 
