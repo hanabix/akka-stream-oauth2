@@ -10,7 +10,7 @@ package object wechat {
     def as[T: JsonReader]: Try[T] = Try { value.utf8String.parseJson.convertTo[T] }
   }
 
-  final case class UserInfo(userid: String, name: String, department: Seq[Int], email: String, status: Int)
+  final case class UserInfo(userid: String, name: String, department: Seq[Int], email: String, status: Int, isleader: Int, enable: Int, alias: String)
   final case class Principal(UserId: String)
   final case class Err(errcode: Int)
   final case class AccessToken(`access_token`: String, `expires_in`: Int) extends FreshToken.Token {
