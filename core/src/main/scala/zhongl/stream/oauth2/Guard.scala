@@ -58,7 +58,7 @@ object Guard {
       def unapply(request: HttpRequest): Boolean = {
         request.headers.find(_.isInstanceOf[Host]).orElse(Some(Host(request.uri.authority.host))).exists {
           case Host(host, _) => host == redirect.authority.host
-        }
+        } && request.uri.path == redirect.path
       }
     }
 
