@@ -50,6 +50,10 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
       Ding(default).authorization("http://test") shouldBe Location(uri)
     }
 
+    "refresh token" in {
+      Await.result(Ding(default).refresh, 1.second).`access_token` shouldBe "token"
+    }
+
     "authenticated" in {
       val f = Ding({
         case (UserInfo("i", "name", Seq(0), "avatar.ico", false, Seq()), _) => HttpResponse()
