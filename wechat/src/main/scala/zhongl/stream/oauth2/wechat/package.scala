@@ -1,15 +1,6 @@
 package zhongl.stream.oauth2
 
-import akka.util.ByteString
-import spray.json._
-
-import scala.util.Try
-
 package object wechat {
-  implicit class TryConvert(val value: ByteString) extends AnyVal {
-    def as[T: JsonReader]: Try[T] = Try { value.utf8String.parseJson.convertTo[T] }
-  }
-
   final case class UserInfo(userid: String, name: String, department: Seq[Int], email: String, status: Int, isleader: Int, enable: Int, alias: String)
   final case class Principal(UserId: String)
   final case class Err(errcode: Int)

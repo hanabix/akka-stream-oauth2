@@ -23,3 +23,10 @@ lazy val wechat = (project in file("wechat"))
     libraryDependencies ++= common
   )
   .dependsOn(core)
+
+lazy val dingtalk = (project in file("dingtalk"))
+  .settings(
+    commonSettings("dingtalk"),
+    libraryDependencies ++= common
+  )
+  .dependsOn(core)
