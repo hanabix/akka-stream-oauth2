@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.http.scaladsl.model.HttpMethods.GET
 import akka.http.scaladsl.model.StatusCodes.{Found, Unauthorized}
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Accept, Host, Location}
+import akka.http.scaladsl.model.headers.{Accept, Location}
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Partition}
 import akka.stream.{FanOutShape2, FlowShape, Graph}
@@ -54,18 +54,12 @@ object Guard {
       def unapply(request: HttpRequest): Boolean = ignore(request)
     }
 
-    object Authorized {
-      def unapply(request: HttpRequest): Boolean = {
-        request.headers.find(_.isInstanceOf[Host]).orElse(Some(Host(request.uri.authority.host))).exists {
-          case Host(host, _) => host == redirect.authority.host
-        } && request.uri.path == redirect.path
-      }
-    }
+    val AuthorizedRedirect = Authorized(redirect)
 
     {
-      case Ignore()     => 0
-      case Authorized() => 1
-      case _            => 2
+      case Ignore()             => 0
+      case AuthorizedRedirect() => 1
+      case _                    => 2
     }
   }
 
