@@ -114,7 +114,11 @@ object Ding extends JsonSupport {
   }
 
   object UserInfoE {
-    def unapply(arg: ByteString): Option[UserInfo] = arg.as[UserInfo].toOption
+    def unapply(arg: ByteString): Option[UserInfo] = {
+      val t = arg.as[UserInfo]
+      if (t.isFailure) t.failed.foreach(_.printStackTrace())
+      t.toOption
+    }
   }
 
   object ErrE {

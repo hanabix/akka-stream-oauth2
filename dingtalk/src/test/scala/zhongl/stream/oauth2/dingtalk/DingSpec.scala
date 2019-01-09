@@ -56,7 +56,7 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
 
     "authenticated" in {
       val f = Ding({
-        case (UserInfo("i", "name", Seq(0), "avatar.ico", false, Seq()), _) => HttpResponse()
+        case (UserInfo("i", "name", Seq(1), "avatar.ico", true, Seq(Role(_, _, _))), _) => HttpResponse()
       }).authenticate(token, HttpRequest(uri = "/authorized?code=c&state=aHR0cDovL3Rlc3Q="))
       Await.result(f, 1.second) shouldBe HttpResponse()
     }
@@ -122,7 +122,7 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
     },
     (get & path("user" / "get") & parameters("access_token", "userid")) {
       case ("token", "i") =>
-        complete(UserInfo("i", "name", Seq(0), "avatar.ico", false, Seq.empty))
+        complete(json("""{"orderInDepts":"","department":[1],"unionid":"u","userid":"i","isSenior":false,"isBoss":false,"name":"name","errmsg":"ok","stateCode":"86","avatar":"avatar.ico","errcode":0,"isLeaderInDepts":"{1:false}","email":"","roles":[{"id":1,"name":"admin","groupName":"","type":101}],"active":true,"isAdmin":true,"openId":"t","mobile":"","isHide":false}"""))
       case ("token", "42001") =>
         complete(Err(42001))
       case (_, _) =>
@@ -141,3 +141,4 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
 object DingSpec {
   final case class TmpAuthCode(`tmp_auth_code`: String)
 }
+
