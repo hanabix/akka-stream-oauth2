@@ -46,7 +46,7 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
 
     "create location header with uri state" in {
       val uri =
-        "https://oapi.dingtalk.com/connect/qrconnect?appid=your_app_id&response_type=code&scope=snsapi_login&redirect_uri=%2Fauthorized&state=aHR0cDovL3Rlc3Q="
+        "https://oapi.dingtalk.com/connect/qrconnect?appid=your_appid&response_type=code&scope=snsapi_login&redirect_uri=%2Fauthorized&state=aHR0cDovL3Rlc3Q="
       Ding(default).authorization("http://test") shouldBe Location(uri)
     }
 
@@ -96,9 +96,9 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
 
   private def mockDingServer = concat(
     (post & path("sns" / "getuserinfo_bycode") & parameters("signature", "timestamp", "accessKey") & entity(as[TmpAuthCode])) {
-      case (signature, timestamp, _, _) if Ding.sign(timestamp, config.getString("secret")) != signature =>
+      case (signature, timestamp, _, _) if Ding.sign(timestamp, config.getString("mobile.secret")) != signature =>
         complete(Err(-1))
-      case (_, _, accessKey, _) if accessKey != config.getString("appid") =>
+      case (_, _, accessKey, _) if accessKey != config.getString("mobile.appid") =>
         complete(Err(-1))
       case (_, _, _, TmpAuthCode("42001")) =>
         complete(json("""{ "errcode": 0, "errmsg": "ok", "user_info": { "nick": "", "openid": "", "unionid": "42001" } }"""))
@@ -129,7 +129,7 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
         complete(Err(-1))
     },
     (get & path("gettoken") & parameters("appkey", "appsecret")) {
-      case (key, secret) if key == config.getString("appkey") && secret == config.getString("secret") =>
+      case (key, secret) if key == config.getString("micro.appkey") && secret == config.getString("micro.secret") =>
         complete(token)
       case (_, _) =>
         complete(Err(-1))
