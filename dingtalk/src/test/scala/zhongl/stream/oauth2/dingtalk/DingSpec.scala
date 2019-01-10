@@ -27,7 +27,7 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
 
   private val default: (UserInfo, Uri) => HttpResponse = (_, _) => HttpResponse()
   private val token                                    = AccessToken("token", 60)
-  private val config                                   = system.settings.config.getConfig("dingtalk.ding")
+  private val config                                   = system.settings.config.getConfig("dingtalk")
 
   private var bound: ServerBinding = _
 

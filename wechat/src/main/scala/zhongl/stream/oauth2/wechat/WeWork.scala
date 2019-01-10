@@ -22,7 +22,7 @@ class WeWork(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Ac
   implicit val ec: ExecutionContext = system.dispatcher
 
   private val http                   = Http()
-  private val config                 = system.settings.config.getConfig("wechat.work")
+  private val config                 = system.settings.config.getConfig("wechat")
   private val `authorization.uri`    = Uri(config.getString("authorization.uri"))
   private val `api.uri.access-token` = Uri(config.getString("api.uri.access-token"))
   private val `api.uri.user-info`    = Uri(config.getString("api.uri.user-info"))

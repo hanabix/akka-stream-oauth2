@@ -24,7 +24,7 @@ class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Acto
   implicit val ec: ExecutionContext = system.dispatcher
 
   private val http                            = Http()
-  private val config                          = system.settings.config.getConfig("dingtalk.ding")
+  private val config                          = system.settings.config.getConfig("dingtalk")
   private val appid                           = config.getString("mobile.appid")
   private val secret                          = config.getString("mobile.secret")
   private val `authorization.uri`             = Uri(config.getString("authorization.uri"))
