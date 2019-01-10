@@ -3,7 +3,7 @@ package zhongl.stream.oauth2
 package object dingtalk {
 
   final case class Role(id: Int, name: String, groupName: String)
-  final case class UserInfo(userid: String, name: String, department: Seq[Int], avatar: String, active: Boolean, roles: Seq[Role])
+  final case class UserInfo(userid: String, name: String, email: String, department: Seq[Int], avatar: String, active: Boolean, roles: Seq[Role])
   final case class UserId(userid: String)
   final case class IdInfo(`unionid`: String)
   final case class Principal(`user_info`: IdInfo)

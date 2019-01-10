@@ -36,7 +36,7 @@ class WeWorkSpec extends WordSpec with Matchers with BeforeAndAfterAll with Dire
 
     "authenticated" in {
       val f = WeWork {
-        case (UserInfo("zhongl", "ZhongLunFu", Seq(0), "zhong.lunfu@gmail.com", 0, 0, 1, "jushi"), _) => HttpResponse()
+        case (UserInfo("zhongl", "ZhongLunFu", Seq(0), "zhong.lunfu@gmail.com", "", 0, 0, 1, "jushi"), _) => HttpResponse()
       }.authenticate(token, HttpRequest(uri = "/authorized?code=c&state=aHR0cDovL3Rlc3Q="))
 
       Await.result(f, 1.second) shouldBe HttpResponse()
@@ -76,7 +76,7 @@ class WeWorkSpec extends WordSpec with Matchers with BeforeAndAfterAll with Dire
         case (_, _)       => complete(Principal("zhongl"))
       },
       (path("user" / "get") & parameter('access_token) & parameter('userid)) { (_, _) =>
-        complete(UserInfo("zhongl", "ZhongLunFu", Seq(0), "zhong.lunfu@gmail.com", 0, 0, 1, "jushi"))
+        complete(UserInfo("zhongl", "ZhongLunFu", Seq(0), "zhong.lunfu@gmail.com", "", 0, 0, 1, "jushi"))
       }
     )
   }

@@ -1,7 +1,7 @@
 package zhongl.stream.oauth2
 
 package object wechat {
-  final case class UserInfo(userid: String, name: String, department: Seq[Int], email: String, status: Int, isleader: Int, enable: Int, alias: String)
+  final case class UserInfo(userid: String, name: String, department: Seq[Int], email: String, avatar: String, status: Int, isleader: Int, enable: Int, alias: String)
   final case class Principal(UserId: String)
   final case class Err(errcode: Int)
   final case class AccessToken(`access_token`: String, `expires_in`: Int) extends FreshToken.Token {
