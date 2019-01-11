@@ -1,10 +1,11 @@
 package zhongl.stream.oauth2
 
 import akka.NotUsed
+import akka.http.scaladsl.model.HttpEntity.Empty
 import akka.http.scaladsl.model.HttpMethods.GET
 import akka.http.scaladsl.model.StatusCodes.{Found, Unauthorized}
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Accept, Location}
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Partition}
 import akka.stream.{FanOutShape2, FlowShape, Graph}
@@ -73,12 +74,23 @@ object Guard {
       }
     }
 
+    @inline
+    def state(uri: Uri, headers: immutable.Seq[HttpHeader]): String = {
+      headers
+        .foldLeft(uri) {
+          case (u, `X-Forwarded-Host`(host))      => u.copy(authority = u.authority.copy(host = host))
+          case (u, `X-Forwarded-Proto`(protocol)) => u.copy(scheme = protocol)
+          case (u, _)                             => u
+        }
+        .toString()
+    }
+
     Flow
       .fromFunction[HttpRequest, HttpResponse] {
-        case HttpRequest(GET, uri, AcceptHtml(), HttpEntity.Empty, _) => HttpResponse(Found, List(location(uri.toString())))
-        case _                                                        => HttpResponse(Unauthorized)
+        case HttpRequest(GET, uri, headers @ AcceptHtml(), Empty, _) => HttpResponse(Found, List(location(state(uri, headers))))
+        case _                                                       => HttpResponse(Unauthorized)
       }
-      .map(FastFuture.successful)
+    .map(FastFuture.successful)
   }
 
   private def authenticate[T <: Token](oauth: OAuth2[T])(implicit ec: ExecutionContext) =

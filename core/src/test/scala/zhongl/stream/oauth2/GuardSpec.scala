@@ -4,14 +4,14 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Accept, Host, Location}
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
   implicit val system = ActorSystem(getClass.getSimpleName)
@@ -35,9 +35,19 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
       Await.result(f, 1.second).status shouldBe Unauthorized
     }
 
-    "redirect get html request" in {
-      val Right(f) = runGuard(HttpRequest(headers = Accept(MediaRanges.`text/*`) :: Nil))
-      Await.result(f, 1.second).status shouldBe Found
+    "challenge get html request" in {
+      val Right(f) = runGuard(HttpRequest(uri = "http://a.b",headers = List(Accept(MediaRanges.`text/*`))))
+      Await.result(f, 1.second) shouldBe HttpResponse(Found, List(Location("http://a.b")))
+    }
+
+    "challenge to location with origin host" in {
+      val Right(f) = runGuard(HttpRequest(uri = "http://a.b", headers = List(Accept(MediaRanges.`text/*`), `X-Forwarded-Host`(Uri.Host("b.c")))))
+      Await.result(f, 1.second) shouldBe HttpResponse(Found, List(Location("http://b.c")))
+    }
+
+    "challenge to location with origin proto" in {
+      val Right(f) = runGuard(HttpRequest(uri = "http://a.b", headers = List(Accept(MediaRanges.`text/*`), `X-Forwarded-Proto`("https"))))
+      Await.result(f, 1.second) shouldBe HttpResponse(Found, List(Location("https://a.b")))
     }
 
   }
@@ -55,11 +65,11 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
 
   object Example extends OAuth2[ValidToken] {
 
-    override def refresh = FastFuture.successful(new ValidToken)
+    override def refresh: Future[ValidToken] = FastFuture.successful(new ValidToken)
 
     override def authenticate(token: ValidToken, request: HttpRequest): Future[HttpResponse] = FastFuture.successful(HttpResponse())
 
-    override def authorization(state: String): Location = Location(Uri())
+    override def authorization(state: String): Location = Location(Uri(state))
 
     override def redirect: Uri = Uri("http://guard/authorized")
   }
