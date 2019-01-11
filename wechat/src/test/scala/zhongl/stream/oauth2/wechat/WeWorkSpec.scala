@@ -25,7 +25,7 @@ class WeWorkSpec extends WordSpec with Matchers with BeforeAndAfterAll with Dire
 
   "WeWork" should {
     "refresh token" in {
-      Await.result(WeWork(default).refresh, 1.second).`access_token` shouldBe "token"
+      Await.result(WeWork(default).refresh, 5.second).`access_token` shouldBe "token"
     }
 
     "create location header with uri state" in {
