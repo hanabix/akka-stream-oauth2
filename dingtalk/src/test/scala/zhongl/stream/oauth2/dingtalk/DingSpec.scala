@@ -11,8 +11,10 @@ import zhongl.stream.oauth2.FreshToken.InvalidToken
 
 import scala.concurrent.duration._
 import scala.concurrent._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Directives with JsonSupport {
+class DingSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Directives with JsonSupport {
   import DingSpec._
 
   implicit val tmpAuthCodeF = jsonFormat1(TmpAuthCode)
