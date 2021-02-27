@@ -85,7 +85,7 @@ class WeWorkSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with D
   }
 
   override protected def beforeAll(): Unit = {
-    val f = Http().bindAndHandle(mockWeWorkServer, "localhost", 12306)
+    val f = Http().newServerAt("localhost", 12306).bindFlow(mockWeWorkServer)
     bound = Await.result(f, 1.second)
   }
 

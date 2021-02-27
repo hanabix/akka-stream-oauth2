@@ -72,7 +72,7 @@ class DingSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Dir
   }
 
   override protected def beforeAll(): Unit = {
-    val f = Http().bindAndHandle(mockDingServer, "localhost", 10086)
+    val f = Http().newServerAt("localhost", 10086).bindFlow(mockDingServer)
     bound = Await.result(f, 1.second)
   }
 
