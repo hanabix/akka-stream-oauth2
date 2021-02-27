@@ -1,22 +1,13 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/98652a7b28ff46d7b7a9cc73b36b362a)](https://app.codacy.com/app/zhonglunfu/akka-stream-oauth2?utm_source=github.com&utm_medium=referral&utm_content=zhongl/akka-stream-oauth2&utm_campaign=badger)
-[![Release](https://jitpack.io/v/zhongl/akka-stream-oauth2.svg)](https://jitpack.io/#zhongl/akka-stream-oauth2)
-[![Build Status](https://travis-ci.org/zhongl/akka-stream-oauth2.svg?branch=master)](https://travis-ci.org/zhongl/akka-stream-oauth2)
-[![Coverage Status](https://coveralls.io/repos/github/zhongl/akka-stream-oauth2/badge.svg?branch=master)](https://coveralls.io/github/zhongl/akka-stream-oauth2?branch=master)
+# akka-stream-oauth2 [![CI](https://github.com/zhongl/akka-stream-oauth2/actions/workflows/ci.yml/badge.svg)](https://github.com/zhongl/akka-stream-oauth2/actions/workflows/ci.yml) [![Release](https://github.com/zhongl/akka-stream-oauth2/actions/workflows/release.yml/badge.svg)](https://github.com/zhongl/akka-stream-oauth2/actions/workflows/release.yml) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/98652a7b28ff46d7b7a9cc73b36b362a)](https://app.codacy.com/app/zhonglunfu/akka-stream-oauth2?utm_source=github.com&utm_medium=referral&utm_content=zhongl/akka-stream-oauth2&utm_campaign=badger) [![Coverage Status](https://coveralls.io/repos/github/zhongl/akka-stream-oauth2/badge.svg?branch=master)](https://coveralls.io/github/zhongl/akka-stream-oauth2?branch=master)  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.zhongl/akka-stream-oauth2-all_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.zhongl/akka-stream-oauth2-all_2.13)
 
-# akka-stream-oauth2
 
 This provides some useful graph shapes of [akka-stream](https://doc.akka.io/docs/akka/current/stream/index.html) for OAuth2.
 
-## Resolvers
-
-```scala
-resolvers += "jitpack" at "https://jitpack.io"
-```
 
 ## Dependencies
 
 ```scala
-libraryDependencies += "com.github.zhongl.akka-stream-oauth2" %% <core or wechat> % <latest tag>
+libraryDependencies += "com.github.zhongl" %% <akka-stream-oauth2-core or akka-stream-oauth2-wechat> % <latest tag>
 ```
 
 ## Usage

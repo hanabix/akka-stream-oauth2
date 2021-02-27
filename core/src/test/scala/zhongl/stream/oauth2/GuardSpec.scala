@@ -36,7 +36,7 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
     }
 
     "challenge get html request" in {
-      val Right(f) = runGuard(HttpRequest(uri = "http://a.b",headers = List(Accept(MediaRanges.`text/*`))))
+      val Right(f) = runGuard(HttpRequest(uri = "http://a.b", headers = List(Accept(MediaRanges.`text/*`))))
       Await.result(f, 1.second) shouldBe HttpResponse(Found, List(Location("http://a.b")))
     }
 
@@ -74,5 +74,3 @@ class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
     override def redirect: Uri = Uri("http://guard/authorized")
   }
 }
-
-

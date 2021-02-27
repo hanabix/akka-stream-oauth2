@@ -1,5 +1,17 @@
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
 
-addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.8")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
 
-addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.2.5")
+addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.2.7")
+
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.2")
+
+addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
+
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.5")
+
+addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.0.2")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "1.0.0")
+
+addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.5")
