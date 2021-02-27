@@ -15,9 +15,6 @@
  */
 
 package zhongl.stream.oauth2.dingtalk
-import java.net.URLEncoder
-import java.util.Base64
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpMethods.POST
@@ -25,13 +22,16 @@ import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.util.FastFuture
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream._
 import akka.util.ByteString
-import com.auth0.jwt.algorithms.Algorithm
 import zhongl.stream.oauth2.FreshToken.InvalidToken
 import zhongl.stream.oauth2._
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.net.URLEncoder
+import java.util.Base64
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
+import scala.concurrent._
 
 class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: ActorSystem) extends OAuth2[AccessToken] {
   import Ding._
@@ -73,8 +73,8 @@ class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Acto
   private def userInfo(code: String, token: String): Future[UserInfo] = {
     http
       .singleRequest(getUserInfoBy(code))
-      .map(complainIllegalResponse {
-        case Content(PrincipalE(p)) => p.`user_info`.`unionid`
+      .map(complainIllegalResponse { case Content(PrincipalE(p)) =>
+        p.`user_info`.`unionid`
       })
       .flatMap { uid =>
         http.singleRequest(getUseridBy(uid, token))
@@ -94,11 +94,11 @@ class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Acto
 
   private def getUserInfoBy(code: String) = {
     val timestamp = System.currentTimeMillis().toString
-    val uri = `api.uri.user-info-by-code`.withQuery(
+    val uri       = `api.uri.user-info-by-code`.withQuery(
       Query(
         "timestamp" -> timestamp,
         "accessKey" -> appid,
-        "signature" -> sign(timestamp, secret)
+        "signature" -> sign("HmacSHA256", "UTF-8", timestamp, secret)
       )
     )
     HttpRequest(POST, uri, entity = HttpEntity(ContentTypes.`application/json`, s"""{"tmp_auth_code":"$code"}"""))
@@ -137,8 +137,11 @@ object Ding extends JsonSupport {
     def unapply(arg: ByteString): Option[Err] = arg.as[Err].toOption
   }
 
-  def sign(content: String, secret: String): String =
-    new String(Base64.getEncoder.encode(Algorithm.HMAC256(secret).sign(content.getBytes("UTF-8"))))
+  def sign(algorithm: String, charset: String, content: String, secret: String): String = {
+    val mac = Mac.getInstance(algorithm)
+    mac.init(new SecretKeySpec(secret.getBytes(charset), algorithm))
+    new String(Base64.getEncoder.encode(mac.doFinal(content.getBytes(charset))))
+  }
 
   def apply(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: ActorSystem): Ding = new Ding(authenticated)
 

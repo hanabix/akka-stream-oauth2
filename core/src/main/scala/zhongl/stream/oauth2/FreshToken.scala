@@ -25,9 +25,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Failure
 import scala.util.control.NoStackTrace
 
-/**
-  *
-  * {{{
+/** {{{
   *
   * +------------------------------------------------+
   * |                                                |
@@ -49,7 +47,7 @@ object FreshToken {
       import GraphDSL.Implicits._
 
       val init           = b.add(Source.single(Future.failed(InvalidToken)))
-      val zip            = b.add(Zip[Future[T], HttpRequest])
+      val zip            = b.add(Zip[Future[T], HttpRequest]())
       val mergeToken     = b.add(Merge[Future[T]](2))
       val bcastToken     = b.add(Broadcast[Future[T]](2))
       val bcastResponse  = b.add(Broadcast[Future[HttpResponse]](2))
@@ -73,7 +71,7 @@ object FreshToken {
 
   private def transform[T <: Token](implicit ec: ExecutionContext) =
     ZipWith[Future[T], Future[HttpResponse], Future[T]]((tf, rf) => {
-      val p = Promise[T]
+      val p = Promise[T]()
       tf.flatMap { t =>
         rf.onComplete {
           case Failure(InvalidToken) => p.failure(InvalidToken)

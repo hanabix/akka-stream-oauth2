@@ -24,6 +24,7 @@ import com.auth0.jwt.{JWT, JWTCreator}
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
 
+import scala.language.postfixOps
 import scala.concurrent.duration._
 import scala.util.{Random, Try}
 
@@ -39,8 +40,8 @@ case class JwtCookie(
   def unapply(request: HttpRequest): Option[DecodedJWT] = {
     request.headers
       .find(_.isInstanceOf[Cookie])
-      .flatMap {
-        case c: Cookie => c.cookies.find(_.name == name).map(_.value)
+      .flatMap { case c: Cookie =>
+        c.cookies.find(_.name == name).map(_.value)
       }
       .flatMap { t =>
         Try { verifier.verify(t) } toOption

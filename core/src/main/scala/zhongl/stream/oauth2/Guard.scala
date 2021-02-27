@@ -106,13 +106,13 @@ object Guard {
         case HttpRequest(GET, uri, headers @ AcceptHtml(), Empty, _) => HttpResponse(Found, List(location(state(uri, headers))))
         case _                                                       => HttpResponse(Unauthorized)
       }
-    .map(FastFuture.successful)
+      .map(FastFuture.successful)
   }
 
   private def authenticate[T <: Token](oauth: OAuth2[T])(implicit ec: ExecutionContext) =
     Flow
-      .fromFunction[(Future[T], HttpRequest), Future[HttpResponse]] {
-        case (tf, req) => tf.flatMap(oauth.authenticate(_, req))
+      .fromFunction[(Future[T], HttpRequest), Future[HttpResponse]] { case (tf, req) =>
+        tf.flatMap(oauth.authenticate(_, req))
       }
       .join(FreshToken.graph(oauth.refresh))
 

@@ -37,6 +37,7 @@ class WeWorkSpec extends WordSpec with Matchers with BeforeAndAfterAll with Dire
     "authenticated" in {
       val f = WeWork {
         case (UserInfo("zhongl", "ZhongLunFu", Seq(0), "zhong.lunfu@gmail.com", "", 0, 0, 1, "jushi"), _) => HttpResponse()
+        case _                                                                                            => HttpResponse(StatusCodes.BadRequest)
       }.authenticate(token, HttpRequest(uri = "/authorized?code=c&state=aHR0cDovL3Rlc3Q="))
 
       Await.result(f, 1.second) shouldBe HttpResponse()
@@ -65,17 +66,17 @@ class WeWorkSpec extends WordSpec with Matchers with BeforeAndAfterAll with Dire
 
   def mockWeWorkServer: Route = get {
     concat(
-      (path("gettoken") & parameter('corpid) & parameter('corpsecret)) { (_, _) =>
+      (path("gettoken") & parameter(Symbol("corpid")) & parameter(Symbol("corpsecret"))) { (_, _) =>
         val json = "{\"errcode\":0,\"errmsg\":\"ok\",\"access_token\":\"token\",\"expires_in\":7200}"
         complete(HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, json)))
       },
-      (path("user" / "getuserinfo") & parameter('access_token) & parameter('code)) {
+      (path("user" / "getuserinfo") & parameter(Symbol("access_token")) & parameter(Symbol("code"))) {
         case (_, "40014") => complete(Err(40014))
         case (_, "42001") => complete(Err(42001))
         case (_, "text")  => complete("text")
         case (_, _)       => complete(Principal("zhongl"))
       },
-      (path("user" / "get") & parameter('access_token) & parameter('userid)) { (_, _) =>
+      (path("user" / "get") & parameter(Symbol("access_token")) & parameter(Symbol("userid"))) { (_, _) =>
         complete(UserInfo("zhongl", "ZhongLunFu", Seq(0), "zhong.lunfu@gmail.com", "", 0, 0, 1, "jushi"))
       }
     )

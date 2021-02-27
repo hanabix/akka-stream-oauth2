@@ -106,6 +106,5 @@ object WeWork extends JsonSupport {
     def unapply(arg: ByteString): Option[Err] = arg.as[Err].toOption
   }
 
-
   def apply(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: ActorSystem): WeWork = new WeWork(authenticated)
 }

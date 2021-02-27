@@ -39,7 +39,7 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
           Flow
             .fromFunction[(Future[Example.type], HttpRequest), Future[HttpResponse]] {
               case (tf, HttpRequest(GET, _, _, _, _))  => tf.flatMap { case Example => FastFuture.failed(InvalidToken) }
-              case (tf, HttpRequest(POST, _, _, _, _)) => tf.map { case Example     => HttpResponse() }
+              case (tf, HttpRequest(POST, _, _, _, _)) => tf.map { case Example => HttpResponse() }
             }
             .join(FreshToken.graph(FastFuture.successful(Example)))
         )
@@ -58,8 +58,8 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
       val sf = Source(List(HttpRequest(), HttpRequest()))
         .via(
           Flow
-            .fromFunction[(Future[Expiration], HttpRequest), Future[HttpResponse]] {
-              case (tf, _) => tf.flatMap { case _ => Thread.sleep(10); FastFuture.successful(HttpResponse()) }
+            .fromFunction[(Future[Expiration], HttpRequest), Future[HttpResponse]] { case (tf, _) =>
+              tf.flatMap { case _ => Thread.sleep(10); FastFuture.successful(HttpResponse()) }
             }
             .join(FreshToken.graph(FastFuture.successful(Expiration(System.currentTimeMillis() + 1))))
         )
@@ -72,12 +72,12 @@ class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   }
 
   private def runFreshToken[T <: Token](freshToken: Graph[Shape[T], NotUsed]) = {
-    val f = Source
+    val f      = Source
       .single(HttpRequest())
       .via(
         Flow
-          .fromFunction[(Future[T], HttpRequest), Future[HttpResponse]] {
-            case (tf, _) => tf.map { case Example => HttpResponse() }
+          .fromFunction[(Future[T], HttpRequest), Future[HttpResponse]] { case (tf, _) =>
+            tf.map { case Example => HttpResponse() }
           }
           .join(freshToken)
       )

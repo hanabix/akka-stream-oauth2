@@ -1,20 +1,16 @@
 package zhongl.stream.oauth2.dingtalk
-import java.util.Base64
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
-import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest._
 import zhongl.stream.oauth2.FreshToken.InvalidToken
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent._
 
 class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Directives with JsonSupport {
   import DingSpec._
@@ -32,17 +28,6 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
   private var bound: ServerBinding = _
 
   "Ding" should {
-    "sign timestamp with secret" in {
-      val algo   = "HmacSHA256"
-      val secret = "secret"
-
-      val timestamp = System.currentTimeMillis().toString
-      val mac       = Mac.getInstance(algo)
-      mac.init(new SecretKeySpec(secret.getBytes("UTF-8"), algo))
-
-      val bytes = mac.doFinal(timestamp.getBytes("UTF-8"))
-      Ding.sign(timestamp, secret) shouldBe new String(Base64.getEncoder.encode(bytes))
-    }
 
     "create location header with uri state" in {
       val uri =
@@ -57,6 +42,7 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
     "authenticated" in {
       val f = Ding({
         case (UserInfo("i", "name", _, Seq(1), "avatar.ico", true, Seq(Role(_, _, _))), _) => HttpResponse()
+        case _                                                                             => HttpResponse(StatusCodes.BadRequest)
       }).authenticate(token, HttpRequest(uri = "/authorized?code=c&state=aHR0cDovL3Rlc3Q="))
       Await.result(f, 1.second) shouldBe HttpResponse()
     }
@@ -96,43 +82,46 @@ class DingSpec extends WordSpec with Matchers with BeforeAndAfterAll with Direct
 
   private def mockDingServer = concat(
     (post & path("sns" / "getuserinfo_bycode") & parameters("signature", "timestamp", "accessKey") & entity(as[TmpAuthCode])) {
-      case (signature, timestamp, _, _) if Ding.sign(timestamp, config.getString("mobile.secret")) != signature =>
+      case (signature, timestamp, _, _) if Ding.sign("HmacSHA256", "UTF-8", timestamp, config.getString("mobile.secret")) != signature =>
         complete(Err(-1))
-      case (_, _, accessKey, _) if accessKey != config.getString("mobile.appid") =>
+      case (_, _, accessKey, _) if accessKey != config.getString("mobile.appid")                                                       =>
         complete(Err(-1))
-      case (_, _, _, TmpAuthCode("42001")) =>
+      case (_, _, _, TmpAuthCode("42001"))                                                                                             =>
         complete(json("""{ "errcode": 0, "errmsg": "ok", "user_info": { "nick": "", "openid": "", "unionid": "42001" } }"""))
-      case (_, _, _, TmpAuthCode("40014")) =>
+      case (_, _, _, TmpAuthCode("40014"))                                                                                             =>
         complete(json("""{ "errcode": 0, "errmsg": "ok", "user_info": { "nick": "", "openid": "", "unionid": "40014" } }"""))
-      case (_, _, _, TmpAuthCode("text")) =>
+      case (_, _, _, TmpAuthCode("text"))                                                                                              =>
         complete("text")
-      case (_, _, _, _) =>
+      case (_, _, _, _)                                                                                                                =>
         complete(json("""{ "errcode": 0, "errmsg": "ok", "user_info": { "nick": "", "openid": "", "unionid": "u" } }"""))
 
     },
     (get & path("user" / "getUseridByUnionid") & parameters("access_token", "unionid")) {
       case ("token", "u") =>
         complete(json(""" { "errcode": 0, "errmsg": "ok", "contactType": 0, "userid": "i" } """))
-      case (_, "40014") =>
+      case (_, "40014")   =>
         complete(Err(40014))
-      case (_, "42001") =>
+      case (_, "42001")   =>
         complete(json(""" { "errcode": 0, "errmsg": "ok", "contactType": 0, "userid": "42001" } """))
-      case (_, _) =>
+      case (_, _)         =>
         complete(Err(-1))
     },
     (get & path("user" / "get") & parameters("access_token", "userid")) {
-      case ("token", "i") =>
-        complete(json(
-          """{"orderInDepts":"","department":[1],"unionid":"u","userid":"i","isSenior":false,"isBoss":false,"name":"name","errmsg":"ok","stateCode":"86","avatar":"avatar.ico","errcode":0,"isLeaderInDepts":"{1:false}","email":"","roles":[{"id":1,"name":"admin","groupName":"","type":101}],"active":true,"isAdmin":true,"openId":"t","mobile":"","isHide":false}"""))
+      case ("token", "i")     =>
+        complete(
+          json(
+            """{"orderInDepts":"","department":[1],"unionid":"u","userid":"i","isSenior":false,"isBoss":false,"name":"name","errmsg":"ok","stateCode":"86","avatar":"avatar.ico","errcode":0,"isLeaderInDepts":"{1:false}","email":"","roles":[{"id":1,"name":"admin","groupName":"","type":101}],"active":true,"isAdmin":true,"openId":"t","mobile":"","isHide":false}"""
+          )
+        )
       case ("token", "42001") =>
         complete(Err(42001))
-      case (_, _) =>
+      case (_, _)             =>
         complete(Err(-1))
     },
     (get & path("gettoken") & parameters("appkey", "appsecret")) {
       case (key, secret) if key == config.getString("micro.appkey") && secret == config.getString("micro.secret") =>
         complete(token)
-      case (_, _) =>
+      case (_, _)                                                                                                 =>
         complete(Err(-1))
     }
   )

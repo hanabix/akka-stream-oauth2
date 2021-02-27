@@ -10,22 +10,22 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 
 class ComplainIllegalResponseSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
-  final implicit val system = ActorSystem(getClass.getSimpleName)
-  final implicit val mat    = ActorMaterializer()
+  implicit final val system = ActorSystem(getClass.getSimpleName)
+  implicit final val mat    = ActorMaterializer()
 
   "Complain illegal response" should {
 
     " with strict entity" in {
-      val f = complainIllegalResponse {
-        case HttpResponse(StatusCodes.OK, _, _, _) => ""
+      val f = complainIllegalResponse { case HttpResponse(StatusCodes.OK, _, _, _) =>
+        ""
       }
 
       intercept[IllegalStateException](f(HttpResponse(BadRequest))).getMessage shouldBe "400 Bad Request - "
     }
 
     "complain illegal response with non strict entity" in {
-      val f = complainIllegalResponse {
-        case HttpResponse(StatusCodes.OK, _, _, _) => ""
+      val f = complainIllegalResponse { case HttpResponse(StatusCodes.OK, _, _, _) =>
+        ""
       }
 
       val response = HttpResponse(BadRequest, entity = HttpEntity(`application/octet-stream`, Source.repeat(ByteString("1"))))
@@ -33,7 +33,6 @@ class ComplainIllegalResponseSpec extends WordSpec with Matchers with BeforeAndA
     }
 
   }
-
 
   override protected def afterAll(): Unit = system.terminate()
 }
