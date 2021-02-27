@@ -8,12 +8,14 @@ import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class GuardSpec extends WordSpec with BeforeAndAfterAll with Matchers {
+class GuardSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
   implicit val system = ActorSystem(getClass.getSimpleName)
   implicit val mat    = ActorMaterializer()
   implicit val ec     = system.dispatcher

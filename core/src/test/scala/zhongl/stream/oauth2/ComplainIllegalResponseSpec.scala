@@ -6,9 +6,11 @@ import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ComplainIllegalResponseSpec extends WordSpec with Matchers with BeforeAndAfterAll {
+class ComplainIllegalResponseSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
 
   implicit final val system = ActorSystem(getClass.getSimpleName)
   implicit final val mat    = ActorMaterializer()
