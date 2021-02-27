@@ -7,7 +7,7 @@ This provides some useful graph shapes of [akka-stream](https://doc.akka.io/docs
 ## Dependencies
 
 ```scala
-libraryDependencies += "com.github.zhongl" %% <akka-stream-oauth2-core or akka-stream-oauth2-wechat> % <latest tag>
+libraryDependencies += "com.github.zhongl" %% "akka-stream-oauth2-<core or wechat or dingtalk>" % <latest tag>
 ```
 
 ## Usage
