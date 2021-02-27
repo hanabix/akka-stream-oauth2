@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import akka.stream.{ActorMaterializer, Graph}
+import akka.stream.{Graph, Materializer}
 import org.scalatest.BeforeAndAfterAll
 import zhongl.stream.oauth2.FreshToken.{InvalidToken, Shape, Token}
 
@@ -17,9 +17,9 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class FreshTokenSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
 
-  implicit val system = ActorSystem(getClass.getSimpleName)
-  implicit val mat    = ActorMaterializer()
-  implicit val ec     = system.dispatcher
+  implicit private val system = ActorSystem(getClass.getSimpleName)
+  implicit private val mat    = Materializer(system)
+  implicit private val ec     = system.dispatcher
 
   "FreshToken" should {
     "refresh token first" in {

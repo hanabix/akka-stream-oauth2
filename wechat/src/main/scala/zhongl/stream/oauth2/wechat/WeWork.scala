@@ -16,26 +16,25 @@
 
 package zhongl.stream.oauth2.wechat
 
-import java.net.URLEncoder
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.util.FastFuture
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.Materializer
 import akka.util.ByteString
 import zhongl.stream.oauth2.FreshToken.InvalidToken
 import zhongl.stream.oauth2._
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.net.URLEncoder
+import scala.concurrent._
 
 class WeWork(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: ActorSystem) extends OAuth2[AccessToken] {
   import WeWork._
 
-  implicit val mat: Materializer    = ActorMaterializer()
-  implicit val ec: ExecutionContext = system.dispatcher
+  implicit private val mat = Materializer(system)
+  implicit private val ec  = system.dispatcher
 
   private val http                   = Http()
   private val config                 = system.settings.config.getConfig("wechat")

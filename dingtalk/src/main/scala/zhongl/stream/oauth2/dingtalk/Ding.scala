@@ -36,8 +36,8 @@ import scala.concurrent._
 class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: ActorSystem) extends OAuth2[AccessToken] {
   import Ding._
 
-  implicit val mat: Materializer    = ActorMaterializer()
-  implicit val ec: ExecutionContext = system.dispatcher
+  implicit private val mat = Materializer(system)
+  implicit private val ec  = system.dispatcher
 
   private val http                            = Http()
   private val config                          = system.settings.config.getConfig("dingtalk")

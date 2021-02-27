@@ -5,23 +5,23 @@ import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.server.Directives
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import org.scalatest._
-import zhongl.stream.oauth2.FreshToken.InvalidToken
-
-import scala.concurrent.duration._
-import scala.concurrent._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import zhongl.stream.oauth2.FreshToken.InvalidToken
+
+import scala.concurrent._
+import scala.concurrent.duration._
 
 class DingSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Directives with JsonSupport {
   import DingSpec._
 
-  implicit val tmpAuthCodeF = jsonFormat1(TmpAuthCode)
+  implicit private val tmpAuthCodeF = jsonFormat1(TmpAuthCode)
 
-  implicit val system: ActorSystem    = ActorSystem(getClass.getSimpleName)
-  implicit val mat: ActorMaterializer = ActorMaterializer()
-  implicit val ec: ExecutionContext   = system.dispatcher
+  implicit private val system = ActorSystem(getClass.getSimpleName)
+  implicit private val mat    = Materializer(system)
+  implicit private val ec     = system.dispatcher
 
   private val default: (UserInfo, Uri) => HttpResponse = (_, _) => HttpResponse()
   private val token                                    = AccessToken("token", 60)

@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.util.FastFuture
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import org.scalatest.BeforeAndAfterAll
 
@@ -16,9 +16,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class GuardSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
-  implicit val system = ActorSystem(getClass.getSimpleName)
-  implicit val mat    = ActorMaterializer()
-  implicit val ec     = system.dispatcher
+  implicit private val system = ActorSystem(getClass.getSimpleName)
+  implicit private val mat    = Materializer(system)
+  implicit private val ec     = system.dispatcher
 
   "Guard" should {
 

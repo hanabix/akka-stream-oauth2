@@ -3,7 +3,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.ContentTypes.`application/octet-stream`
 import akka.http.scaladsl.model.StatusCodes.BadRequest
 import akka.http.scaladsl.model._
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import org.scalatest.BeforeAndAfterAll
@@ -12,8 +12,8 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class ComplainIllegalResponseSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
 
-  implicit final val system = ActorSystem(getClass.getSimpleName)
-  implicit final val mat    = ActorMaterializer()
+  implicit private val system = ActorSystem(getClass.getSimpleName)
+  implicit private val mat    = Materializer(system)
 
   "Complain illegal response" should {
 
