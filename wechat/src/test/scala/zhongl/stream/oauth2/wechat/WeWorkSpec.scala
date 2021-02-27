@@ -12,8 +12,10 @@ import zhongl.stream.oauth2.FreshToken.InvalidToken
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class WeWorkSpec extends WordSpec with Matchers with BeforeAndAfterAll with Directives with JsonSupport {
+class WeWorkSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Directives with JsonSupport {
   implicit val system: ActorSystem    = ActorSystem(getClass.getSimpleName)
   implicit val mat: ActorMaterializer = ActorMaterializer()
   implicit val ec: ExecutionContext   = system.dispatcher
