@@ -7,13 +7,15 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, Graph}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest.BeforeAndAfterAll
 import zhongl.stream.oauth2.FreshToken.{InvalidToken, Shape, Token}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class FreshTokenSpec extends WordSpec with Matchers with BeforeAndAfterAll {
+class FreshTokenSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
 
   implicit val system = ActorSystem(getClass.getSimpleName)
   implicit val mat    = ActorMaterializer()

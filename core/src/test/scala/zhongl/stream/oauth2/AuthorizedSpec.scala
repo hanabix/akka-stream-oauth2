@@ -1,9 +1,10 @@
 package zhongl.stream.oauth2
 import akka.http.scaladsl.model.headers.Host
 import akka.http.scaladsl.model.{HttpRequest, Uri}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class AuthorizedSpec extends WordSpec with Matchers {
+class AuthorizedSpec extends AnyWordSpec with Matchers {
   "Authorized redirect" should {
     "only matches path" in {
       Authorized(Uri("/path")).unapply(HttpRequest(uri = Uri("http://any/path"))) shouldBe true

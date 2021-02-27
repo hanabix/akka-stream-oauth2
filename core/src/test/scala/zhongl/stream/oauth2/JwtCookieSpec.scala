@@ -3,11 +3,12 @@ package zhongl.stream.oauth2
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.headers.Cookie
 import com.auth0.jwt.JWT
-import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class JwtCookieSpec extends WordSpec with Matchers {
+class JwtCookieSpec extends AnyWordSpec with Matchers {
 
   classOf[JwtCookie].getSimpleName should {
     "work" in {
