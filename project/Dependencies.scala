@@ -36,6 +36,6 @@ object Dependencies {
   )
 
   val auth0 = Seq(
-    "com.auth0" % "java-jwt" % "3.16.0"
+    "com.auth0" % "java-jwt" % "3.18.1"
   )
 }
