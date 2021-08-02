@@ -20,7 +20,7 @@ object Dependencies {
 
   object Version {
     val akka = "2.6.15"
-    val http = "10.2.4"
+    val http = "10.2.5"
   }
 
   val common = Seq(
