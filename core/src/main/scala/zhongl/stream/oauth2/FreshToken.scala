@@ -37,7 +37,8 @@ import scala.util.control.NoStackTrace
   * |                                                |
   * +------------------------------------------------+
   * }}}
-  * @see akka.stream.scaladsl.Flow#join(akka.stream.Graph)
+  * @see
+  *   akka.stream.scaladsl.Flow#join(akka.stream.Graph)
   */
 object FreshToken {
   type Shape[T <: Token] = BidiShape[Future[HttpResponse], Future[HttpResponse], HttpRequest, (Future[T], HttpRequest)]
