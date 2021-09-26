@@ -66,7 +66,7 @@ class WeWorkSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with D
     }
   }
 
-  def mockWeWorkServer: Route = get {
+  def mockWeWorkServer: Route              = get {
     concat(
       (path("gettoken") & parameter(Symbol("corpid")) & parameter(Symbol("corpsecret"))) { (_, _) =>
         val json = "{\"errcode\":0,\"errmsg\":\"ok\",\"access_token\":\"token\",\"expires_in\":7200}"
@@ -89,7 +89,7 @@ class WeWorkSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with D
     bound = Await.result(f, 1.second)
   }
 
-  override protected def afterAll(): Unit = {
+  override protected def afterAll(): Unit  = {
     Await.result(bound.unbind().flatMap(_ => system.terminate()), 3.second)
   }
 }

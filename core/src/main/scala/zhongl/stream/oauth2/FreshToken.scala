@@ -37,7 +37,8 @@ import scala.util.control.NoStackTrace
   * |                                                |
   * +------------------------------------------------+
   * }}}
-  * @see akka.stream.scaladsl.Flow#join(akka.stream.Graph)
+  * @see
+  *   akka.stream.scaladsl.Flow#join(akka.stream.Graph)
   */
 object FreshToken {
   type Shape[T <: Token] = BidiShape[Future[HttpResponse], Future[HttpResponse], HttpRequest, (Future[T], HttpRequest)]
@@ -64,12 +65,12 @@ object FreshToken {
       BidiShape(bcastResponse.in, bcastResponse.out(0), zip.in1, zip.out)
     }
 
-  private def refresh[T <: Token](fresh: => Future[T])(implicit ec: ExecutionContext) =
+  private def refresh[T <: Token](fresh: => Future[T])(implicit ec: ExecutionContext)                 =
     Flow.fromFunction[Future[T], Future[T]] { f =>
       f.map(t => if (t.isInvalid) throw InvalidToken else t).recoverWith { case InvalidToken => fresh }
     }
 
-  private def transform[T <: Token](implicit ec: ExecutionContext) =
+  private def transform[T <: Token](implicit ec: ExecutionContext)                                    =
     ZipWith[Future[T], Future[HttpResponse], Future[T]]((tf, rf) => {
       val p = Promise[T]()
       tf.flatMap { t =>

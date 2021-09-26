@@ -47,7 +47,7 @@ class WeWork(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Ac
 
   private val fixedQueryString = s"redirect_uri=${URLEncoder.encode(redirect.toString(), "utf-8")}&state="
 
-  override def refresh: Future[AccessToken] = {
+  override def refresh: Future[AccessToken]                                                 = {
     http
       .singleRequest(HttpRequest(uri = `api.uri.access-token`))
       .map(complainIllegalResponse { case Content(AccessTokenE(token)) => token })
@@ -60,7 +60,7 @@ class WeWork(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Ac
     }).getOrElse(FastFuture.successful(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity("missing code or state"))))
   }
 
-  override def authorization(state: String): Location = {
+  override def authorization(state: String): Location                                       = {
     val qs = s"$fixedQueryString${base64Encode(state)}"
     Location(`authorization.uri`.withRawQueryString(`authorization.uri`.rawQueryString.map(_ + s"&$qs").getOrElse(qs)))
   }

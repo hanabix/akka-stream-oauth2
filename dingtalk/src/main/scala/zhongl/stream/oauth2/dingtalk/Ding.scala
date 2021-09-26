@@ -50,7 +50,7 @@ class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Acto
   private val `api.uri.get-userid-by-unionid` = Uri(config.getString("api.uri.get-userid-by-unionid"))
   private val fixedQueryString                = s"redirect_uri=${URLEncoder.encode(redirect.toString(), "utf-8")}&state="
 
-  override def refresh: Future[AccessToken] = {
+  override def refresh: Future[AccessToken]                                                 = {
     http
       .singleRequest(HttpRequest(uri = `api.uri.access-token`))
       .map(complainIllegalResponse { case Content(AccessTokenE(token)) => token })
@@ -63,12 +63,12 @@ class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Acto
     }).getOrElse(FastFuture.successful(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity("missing code or state"))))
   }
 
-  override def authorization(state: String): Location = {
+  override def authorization(state: String): Location                                       = {
     val qs = s"$fixedQueryString${base64Encode(state)}"
     Location(`authorization.uri`.withRawQueryString(`authorization.uri`.rawQueryString.map(_ + s"&$qs").getOrElse(qs)))
   }
 
-  override def redirect: Uri = Uri(config.getString("authorization.redirect"))
+  override def redirect: Uri                                                                = Uri(config.getString("authorization.redirect"))
 
   private def userInfo(code: String, token: String): Future[UserInfo] = {
     http
@@ -92,7 +92,7 @@ class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Acto
       })
   }
 
-  private def getUserInfoBy(code: String) = {
+  private def getUserInfoBy(code: String)                             = {
     val timestamp = System.currentTimeMillis().toString
     val uri       = `api.uri.user-info-by-code`.withQuery(
       Query(
@@ -104,11 +104,11 @@ class Ding(authenticated: (UserInfo, Uri) => HttpResponse)(implicit system: Acto
     HttpRequest(POST, uri, entity = HttpEntity(ContentTypes.`application/json`, s"""{"tmp_auth_code":"$code"}"""))
   }
 
-  private def getUserBy(uid: String, token: String) = {
+  private def getUserBy(uid: String, token: String)                   = {
     HttpRequest(uri = `api.uri.user-get`.withQuery(queryWith(token, "userid" -> uid)))
   }
 
-  private def getUseridBy(unionid: String, token: String) = {
+  private def getUseridBy(unionid: String, token: String)             = {
     HttpRequest(uri = `api.uri.get-userid-by-unionid`.withQuery(queryWith(token, "unionid" -> unionid)))
   }
 

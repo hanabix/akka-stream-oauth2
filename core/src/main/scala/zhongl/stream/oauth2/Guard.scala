@@ -49,7 +49,7 @@ object Guard {
       new FanOutShape2(partition.in, partition.out(0), merge.out)
     }
 
-  def asFlow(graph: Graph[Shape, NotUsed]) = GraphDSL.create() { implicit b =>
+  def asFlow(graph: Graph[Shape, NotUsed])                                                   = GraphDSL.create() { implicit b =>
     import GraphDSL.Implicits._
 
     val fos2  = b.add(graph)
@@ -80,7 +80,7 @@ object Guard {
     }
   }
 
-  private def challenge(location: String => Location) = {
+  private def challenge(location: String => Location)                                        = {
     object AcceptHtml {
       def unapply(headers: immutable.Seq[HttpHeader]): Boolean = {
         headers.exists {
@@ -109,7 +109,7 @@ object Guard {
       .map(FastFuture.successful)
   }
 
-  private def authenticate[T <: Token](oauth: OAuth2[T])(implicit ec: ExecutionContext) =
+  private def authenticate[T <: Token](oauth: OAuth2[T])(implicit ec: ExecutionContext)      =
     Flow
       .fromFunction[(Future[T], HttpRequest), Future[HttpResponse]] { case (tf, req) =>
         tf.flatMap(oauth.authenticate(_, req))

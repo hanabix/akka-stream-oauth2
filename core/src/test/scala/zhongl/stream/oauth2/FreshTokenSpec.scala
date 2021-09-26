@@ -88,9 +88,9 @@ class FreshTokenSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
     future
   }
 
-  override protected def afterAll(): Unit = system.terminate()
+  override protected def afterAll(): Unit                                     = system.terminate()
 
-  object Example extends Token {
+  object Example                         extends Token {
     override def isInvalid: Boolean = false
   }
 

@@ -76,11 +76,11 @@ class DingSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Dir
     bound = Await.result(f, 1.second)
   }
 
-  override protected def afterAll(): Unit = {
+  override protected def afterAll(): Unit  = {
     Await.result(bound.unbind().flatMap(_ => system.terminate()), 3.second)
   }
 
-  private def json(content: String) = HttpEntity(ContentTypes.`application/json`, content)
+  private def json(content: String)        = HttpEntity(ContentTypes.`application/json`, content)
 
   private def mockDingServer = concat(
     (post & path("sns" / "getuserinfo_bycode") & parameters("signature", "timestamp", "accessKey") & entity(as[TmpAuthCode])) {
