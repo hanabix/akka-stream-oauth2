@@ -19,12 +19,12 @@ import sbt._
 object Dependencies {
 
   object Version {
-    val akka = "2.6.17"
+    val akka = "2.6.18"
     val http = "10.2.7"
   }
 
   val common = Seq(
-    "org.scalatest" %% "scalatest" % "3.2.10" % Test,
+    "org.scalatest" %% "scalatest" % "3.2.11" % Test,
     "org.scalamock" %% "scalamock" % "5.2.0"  % Test
   )
 
