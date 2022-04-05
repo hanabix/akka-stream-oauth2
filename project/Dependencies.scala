@@ -19,7 +19,7 @@ import sbt._
 object Dependencies {
 
   object Version {
-    val akka = "2.6.18"
+    val akka = "2.6.19"
     val http = "10.2.8"
   }
 
