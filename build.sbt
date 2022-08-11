@@ -4,6 +4,7 @@ inThisBuild(
   Seq(
     scalaVersion       := "2.13.8",
     scalafmtOnCompile  := true,
+    coverageEnabled    := true,
     scalacOptions ++= Seq(
       "-deprecation",
       "-encoding",
