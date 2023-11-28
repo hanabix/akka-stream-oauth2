@@ -7,13 +7,13 @@ on:
   pull_request:
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: olafurpg/setup-scala@v13
+      - uses: actions/checkout@v4
+      - uses: coursier/setup-action@v1
       - name: branch-names
         id: branch-name
-        uses: tj-actions/branch-names@v2.2
+        uses: tj-actions/branch-names@v7
       - run: sbt coverage +test coverageReport 
       - run: sbt coverageAggregate coveralls
         env:
